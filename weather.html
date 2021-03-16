@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+		
+<script type = "text/javascript"> 
+
+$(document).ready( function(){
+   $("#wrequest").click(function(){ 
+   document.getElementById("weather-results").style.visibility = "visible";
+     var zip = $("#zip").val();
+             type: 		"GET",
+		 $.ajax({
+             url: 		"weather-report-zip.php",
+             data: 		"zip="+zip,
+		     beforeSend: function()
+			 { 		
+			    $("#weather-results").html("<div id = \"spinner\"></div>");                
+			 },
+			 error: 	 function(xhr, status, error) 
+			 {  
+				alert( "Error Mesaage:  \r\nNumeric code is: "  + xhr.status + " \r\nError is " + error + "\nPlease try again.");   
+				location.reload();
+			 },
+			 success: 	 function(result)
+			 { 
+				try
+				{
+					r = JSON.parse(result);
+				}
+				catch(e)
+				{
+					alert("An error has occurred.\nPlease enter a valid US zip code or South African postal code.");
+					location.reload();
+				}
+				//get sunrise and sunset times
+				sunR = parseInt(r.sys.sunrise, 10);
+				sunS = parseInt(r.sys.sunset, 10);
+				//make the sunrise and sunset times more readable
+				rDate = new Date(sunR * 1000);
+				sDate = new Date(sunS * 1000);
+				//make sunrise and sunset times in hh:mm AM/PM format
+				rDate = rDate.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
+				sDate = sDate.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
+				
+				//get weather icon
+				code = r.weather[0].icon;
+				urlIcon =  "https://openweathermap.org/img/w/" + code + ".png";
+				console.log(urlIcon);
+				//insert icon image 
+				img = $('<img id = "dynamic"/>');
+				img.attr('src', urlIcon);
+				//img.appendTo('#icon');
+				//$("#icon").attr("src", urlIcon);
+				//document.getElementById("icon").src = urlIcon;
+				//$("#icon").html(icon); 	
+				
+				res =  "<br>City: "		   + r.name                   +  " "	   +	 
+					   "<br>Temperature: " + r.main.temp              + "&deg;F "  +	 	 
+				       "<br>Weather: " 	   + r.weather[0].main        + " "        +	 
+					   "<br>Description: " + r.weather[0].description + " "        +
+					   "<br>Humidity: "    + r.main.humidity          + "% "       +
+					   "<br>Wind Speed: "  + r.wind.speed             + " m/s"     +
+					   "<br>Sunrise: "     + rDate                    + "    "     +
+					   "<br>Sunset: "      + sDate                    + " ";
+				w = r.weather[0].main;
+				if(w == "Clear")
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/u01ioCe6G8URG/giphy.gif')";
+				}
+				else if(w == "Clouds")
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/gk3s6G7AdUNkey0YpE/giphy.gif')";
+				}
+				else if(w == "Drizzle" || w == "Rain")
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/t7Qb8655Z1VfBGr5XB/giphy.gif')";
+				}
+				else if(w == "Snow")
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/7Bgpw7PwdxoDC/giphy.gif')";
+				}
+				else if(w = "Thunderstorm")
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/l0MYzA5czu7GV1Xt6/giphy.gif')";
+				}
+				else
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/3ohhwNqFMnb7wZgNnq/giphy.gif')";
+				}
+				$("#weather-results").html(img); 
+				$("#weather-results").append(res); 
+			}	//         - }  ends definition of function(result){ ... }
+		});	    //         - }) ends  $.ajax({ ...  })  
+  });//         - }) ends event handler for button:  click(function(){ })
+  
+  
+  //geolocation:
+locptr = document.getElementById("location");
+clickedptr = document.getElementById("location-clicked");
+clickedptr.addEventListener("click", geo);
+
+function geo()
+{
+	if(navigator.geolocation)
+	{
+		navigator.geolocation.getCurrentPosition(foundLoc, ohNo);
+	}
+	else
+	{
+		notsupp = "<h2>Geolocation is not supported by this browser...</h2>";
+		$("#location").html(notsupp);
+	}
+}
+
+function foundLoc(res)
+{
+	document.getElementById("weather-results").style.visibility = "visible";
+	//ajax for geolocation:
+	  lat = res.coords.latitude;
+	  lon = res.coords.longitude;
+	  d = "lat=" + lat + "&lon=" + lon;
+             type: 		"GET",
+		 $.ajax({
+             url: 		"weather-report-geoloc.php",
+             data: 		d,
+		     beforeSend: function()
+			 { 		
+			    $("#weather-results").html("<div id = \"spinner\"></div>");                
+			 },
+			 error: 	 function(xhr, status, error) 
+			 {  
+				alert( "Error Mesaage:  \r\nNumeric code is: "  + xhr.status + " \r\nError is " + error);   
+			 },
+			 success: 	 function(result)
+			 {
+				try
+				{
+					r = JSON.parse(result);
+				}
+				catch(e)
+				{
+					alert("An error has occurred.\nPlease refresh the page and enter a valid US zip code or South African postal code.");
+				}
+				//get sunrise and sunset times
+				sunR = parseInt(r.sys.sunrise, 10);
+				sunS = parseInt(r.sys.sunset, 10);
+				//make the sunrise and sunset times more readable
+				rDate = new Date(sunR * 1000);
+				sDate = new Date(sunS * 1000);
+				//make sunrise and sunset times in hh:mm AM/PM format
+				rDate = rDate.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
+				sDate = sDate.toLocaleString('en-US', {hour: 'numeric', minute: 'numeric', hour12: true});
+				
+				//get weather icon
+				code = r.weather[0].icon;
+				urlIcon =  "https://openweathermap.org/img/w/" + code + ".png";
+				console.log(urlIcon);
+				//insert icon image 
+				img = $('<img id = "dynamic"/>');
+				img.attr('src', urlIcon);
+				img.appendTo('#icon');
+				//$("#icon").attr("src", urlIcon);
+				//document.getElementById("icon").src = urlIcon;
+				//$("#icon").html(icon); 	 	
+				
+				res =  "<br>City: "		   + r.name                   +  " "	   +	 
+					   "<br>Temperature: " + r.main.temp              + "&deg;F "  +	 
+				       "<br>Weather: " 	   + r.weather[0].main        + " "        +	 
+					   "<br>Description: " + r.weather[0].description + " "        +
+					   "<br>Humidity: "    + r.main.humidity          + "% "       +
+					   "<br>Wind Speed: "  + r.wind.speed             + " m/s"     +
+					   "<br>Sunrise: "     + rDate                    + "    "     +
+					   "<br>Sunset: "      + sDate                    + " ";
+				w = r.weather[0].main;
+				if(w == "Clear")
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/u01ioCe6G8URG/giphy.gif')";
+				}
+				else if(w == "Clouds")
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/gk3s6G7AdUNkey0YpE/giphy.gif')";
+				}
+				else if(w == "Drizzle" || w == "Rain")
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/t7Qb8655Z1VfBGr5XB/giphy.gif')";
+				}
+				else if(w == "Snow")
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/7Bgpw7PwdxoDC/giphy.gif')";
+				}
+				else if(w = "Thunderstorm")
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/l0MYzA5czu7GV1Xt6/giphy.gif')";
+				}
+				else
+				{
+					document.body.style.backgroundImage = "url('https://media.giphy.com/media/3ohhwNqFMnb7wZgNnq/giphy.gif')";
+				}
+
+				$("#weather-results").html(img); 
+				$("#weather-results").append(res); 
+				
+			}	//         - }  ends definition of function(result){ ... }
+		});	    //         - }) ends  $.ajax({ ...  }) 
+}			
+
+function ohNo(error)
+{
+	switch(error.code)
+	{
+		case error.PERMISSION_DENIED:
+		den = "<h2>You have denied access to geolocation... \nPlease enter valid US zip code or South African postal code for weather report.</h2>";
+		$("#location").html(den);
+		break;
+		default:
+		er = "<h2>An error occurred while trying to determine geolocation...</h2>";
+		$("#location").html(er);
+
+	}
+}
+});	//         - }) ends ready event handler:  		ready( function(){ ... })
+
+ </script> 
+ 
+<style>
+	body
+	{
+		background-image: url("https://media.giphy.com/media/WzLDljBpplUvm/source.gif");
+		background-size: cover;
+		height: 100vh;
+		padding: 0;
+		margin: 0;
+	}
+
+	
+	#weather-input
+	{
+		/*margin: auto; */
+		margin-top: 5em;
+		margin-left: auto;
+		margin-right: auto;
+		margin-bottom: auto;
+		border: 2px solid #3D4AFF; 
+		padding:20px; 
+		padding-top: 30px;
+		width:  300px;
+		text-align: center;
+		border-radius: 8px;
+		background-color: #339CC3;   /*339CC3*/
+		opacity: 0.75;
+		font-family: arial;
+		color: #D4E9FF;  /*000D4D*/
+	}
+	
+	#weather-results
+	{
+		margin-top: 5em;
+		margin-left: auto;
+		margin-right: auto;
+		margin-bottom: auto;
+		border: 2px solid #3D4AFF; 
+		padding:20px; 
+		padding-top: 30px;
+		width:  300px;
+		text-align: center;
+		border-radius: 8px;
+		background-color: #339CC3;   /*3DCCFF*/
+		opacity: 0.75;
+		font-family: arial;
+		color: #D4E9FF;
+		visibility: hidden;
+	}
+	
+	button
+	{
+		color: white;
+		background-color: #0066CC;
+		text-align: center;
+		padding: 10px 15px;
+		font-size: 14px;
+		text-decoration: none;
+		display: inline-block;
+		font-family: arial;
+		border-radius: 12px;
+		opacity: 1.0;
+	}
+	
+	#spinner
+	{
+		display: inline-block;
+		width: 45px;
+		height: 45px;
+		border: 3px solid rgba(255,255,255, 0.3);
+		border-radius: 50%;
+		border-top-color: #FFF;
+		animation: spin 1s ease-in-out infinite;
+		-webkit-animation: spin 1s ease-in-out infinite;
+		
+	}
+	
+	@keyframes spinner 
+	{
+        to 
+		{
+          -webkit-transform: rotate(360deg);
+        }
+     } 
+	  
+	@-webkit-keyframes spin 
+	 {
+       to 
+		{
+          -webkit-transform: rotate(360deg);
+        }
+    }
+	
+	#location
+	{
+		visibility: hidden;
+	}
+	
+	img
+	{
+		width:  200px;
+		height: 200px;
+	}
+	 
+</style>
+
+<head>
+	<title>Jessica Bakare's Simple Weather Report</title>
+</head>
+<body id = "start">
+
+	<div id = "weather-input">
+		<h3>Weather Report</h3>
+		&ensp;&ensp;&ensp;&ensp;&ensp;Enter zip code &emsp; &ensp; &ensp; <input type=text  name="zip" id = "zip" autocomplete = "off"><br><br>
+		<button id = "wrequest" type=button>Request Weather</button>
+		<h2>~~~~~~~OR~~~~~~~</h2>
+		<button id = "location-clicked" type = button> Get My Location</button>
+		<div id = "location"></div>
+	</div>
+	
+	<div id = "weather-results">
+		<div id = "icon">
+		</div>
+	</div>
+	
+</body>
+
+
+
+
