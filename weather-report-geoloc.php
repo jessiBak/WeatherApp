@@ -5,7 +5,7 @@
 	
 	sleep(2);
 	
-	$url = "http://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&units=imperial&appid=5516886043fc3646ecc39fad44818089";
+	$url = "http://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&units=imperial&appid=[YOUR API KEY HERE]";
 
 	//5. Retrieve url response
 	$fp = fopen ( $url , "r" ); 
