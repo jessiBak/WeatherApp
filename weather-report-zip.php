@@ -33,7 +33,7 @@ $country = "";
 	    exit();
 	}
 	
-$url = "http://api.openweathermap.org/data/2.5/weather?zip=$z,$country&units=imperial&appid="[YOUR API KEY HERE]";
+$url = "http://api.openweathermap.org/data/2.5/weather?zip=$z,$country&units=imperial&appid=[YOUR API KEY HERE]";
 $fp = fopen($url , "r"); 
 
 $contents = "";
